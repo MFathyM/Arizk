@@ -1,5 +1,4 @@
-plotly==4.14.3
-streamlit==0.74.1
-pandas==1.2.0
-pillow==8.1.0
-Pyrebase>=2.19.1
+plotly==5.6.0
+streamlit==1.7.0
+pandas==1.4.1
+Pyrebase4==4.5.0
