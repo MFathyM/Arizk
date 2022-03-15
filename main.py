@@ -61,6 +61,7 @@ visitBarChart = px.bar(visitCounts,
                     template='plotly_white')
 st.plotly_chart(visitBarChart)
 st.dataframe(visitData)
+st.dataframe(visitCounts)
 
 #Activity Visualization
 st.subheader('Activity Visualization')
