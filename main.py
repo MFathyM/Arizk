@@ -77,7 +77,7 @@ st.dataframe(activityData)
 #Offer Visualization
 st.subheader('Offer Visualization')
 offerData = fbChildToDf("Offers")
-offerData = offerData[offerData['offerNumber']!="0"]
+offerData = offerData[len(offerData['offerNumber'])<8]
 offerCounts = offerData['offerUserName'].value_counts()
 offerBarChart = px.bar(offerCounts,
                     x=offerCounts.index,
