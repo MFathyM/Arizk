@@ -9,20 +9,11 @@ Created on Sat Mar 12 19:35:24 2022
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-from PIL import Image
 import pyrebase
-import requests
-from io import BytesIO
 
 #Title and Header
 st.set_page_config(page_title='Arizk Force')
 st.header('Arizk Force')
-
-#Show Logo
-url = 'https://github.com/MFathyM/Arizk/blob/574005c44de95889e3e6173ccafb5bf475471927/logo.PNG'
-response = requests.get(url)
-img = Image.open(BytesIO(response.content))
-img.show()
 
 #API configuration of firebase
 firebaseConfig={'apiKey': "AIzaSyAc1i1S9nU3Zg6X_5j0uH4X2JmJXAPLW5w",
