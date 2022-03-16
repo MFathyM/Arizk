@@ -9,14 +9,14 @@ Created on Sat Mar 12 19:35:24 2022
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-# from PIL import Image
+from PIL import Image
 import pyrebase
 
 #Title and Header
 st.set_page_config(page_title='Arizk Force')
 st.header('Arizk Force')
-# image = Image.open('images/logo.png')
-# st.image(image,use_column_width=True)
+image = Image.open('logo.png')
+st.image(image,use_column_width=True)
 
 #API configuration of firebase
 firebaseConfig={'apiKey': "AIzaSyAc1i1S9nU3Zg6X_5j0uH4X2JmJXAPLW5w",
