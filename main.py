@@ -11,12 +11,13 @@ import streamlit as st
 import plotly.express as px
 from PIL import Image
 import pyrebase
+import requests
 
 #Title and Header
 st.set_page_config(page_title='Arizk Force')
 st.header('Arizk Force')
-image = Image.open('logo.png')
-st.image(image,use_column_width=True)
+url = 'https://github.com/MFathyM/Arizk/blob/574005c44de95889e3e6173ccafb5bf475471927/logo.PNG'
+Image.open(requests.get(url, stream=True).raw)
 
 #API configuration of firebase
 firebaseConfig={'apiKey': "AIzaSyAc1i1S9nU3Zg6X_5j0uH4X2JmJXAPLW5w",
