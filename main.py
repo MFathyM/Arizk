@@ -12,6 +12,7 @@ import plotly.express as px
 from PIL import Image
 import pyrebase
 import requests
+from io import BytesIO
 
 #Title and Header
 st.set_page_config(page_title='Arizk Force')
