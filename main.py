@@ -60,16 +60,16 @@ offerDF.rename("date")
 #Filter Date Inputs
 dates = [kpiData['date'], visitData['date'], activityData['date'], offerDF]
 dates = pd.concat(dates)
-startDate=st.date_input("Start Date", value=min(dates))
+startDate=st.sidebar.date_input("Start Date", value=min(dates))
 startDate=startDate.strftime('%d/%m/%y')
-endDate=st.date_input("End Date")
+endDate=st.sidebar.date_input("End Date")
 endDate=endDate.strftime('%d/%m/%y')
 
 #Filter Drop Down users
 userNames = userData['userName'].tolist()
 userNames.append('All')
 userNames.remove('Guest')
-selectedUser = st.selectbox('Select User',userNames, index = userNames.index('All'))
+selectedUser = st.sidebar.selectbox('Select User',userNames, index = userNames.index('All'))
 
 #Filter dataframes by date
 def filterDfByDate(df1, start_date, end_date, date_string):
