@@ -11,6 +11,8 @@ import streamlit as st
 import plotly.express as px
 import pyrebase
 
+from datetime import datetime
+
 #Title and Header
 st.set_page_config(page_title='Arizk Force')
 st.header('Arizk Force')
@@ -35,54 +37,119 @@ def fbChildToDf(childName):
         itemList.append(item.val())
     return pd.DataFrame(itemList)
 
+#Importing Data
+kpiData = fbChildToDf("KPIs")
+visitData = fbChildToDf("Visits")
+activityData = fbChildToDf("Activities")
+offerData = fbChildToDf("Offers")
+userData = fbChildToDf("Users")
+
+#Convert dates into datetime
+kpiDates = kpiData['date'].tolist()
+kpiDatesEdited = []
+for kpiDate in kpiDates:
+    kpiDatesEdited.append(kpiDate[0:8])
+kpiData['date']=kpiDatesEdited
+kpiData['date'] = kpiData['date'].apply(lambda x: datetime.strptime(x, '%d/%m/%y'))
+visitData['date'] = visitData['date'].apply(lambda x: datetime.strptime(x, '%d/%m/%y %H:%M:%S'))
+activityData['date'] = activityData['date'].apply(lambda x: datetime.strptime(x, '%d/%m/%y'))
+offerData['offerDate'] = offerData['offerDate'].apply(lambda x: datetime.strptime(x, '%d/%m/%y'))
+offerDF = offerData['offerDate']
+offerDF.rename("date")
+
+#Filter Date Inputs
+dates = [kpiData['date'], visitData['date'], activityData['date'], offerDF]
+dates = pd.concat(dates)
+startDate=st.date_input("Start Date", value=min(dates))
+startDate=startDate.strftime('%d/%m/%y')
+endDate=st.date_input("End Date")
+endDate=endDate.strftime('%d/%m/%y')
+
+#Filter Drop Down users
+userNames = userData['userName'].tolist()
+userNames.append('All')
+userNames.remove('Guest')
+selectedUser = st.selectbox('Select User',userNames, index = userNames.index('All'))
+
+#Filter dataframes by date
+def filterDfByDate(df1, start_date, end_date, date_string):
+    df2 = df1[(df1[date_string]>=datetime.strptime(start_date, '%d/%m/%y'))]
+    if not df2.empty:
+        df2 = df2[(df2[date_string]<=datetime.strptime(end_date, '%d/%m/%y'))]
+    return df2
+
+#Filter dataframes by user name
+def filterDfByName(dfa, selected_user, user_string):
+    dfb=dfa
+    if not selected_user=='All' and not dfa.empty:
+        dfb = dfa[(dfa[user_string]==selected_user)]
+    return dfb
+
 #KPI Visualization
 st.subheader('KPI Visualization')
-kpiData = fbChildToDf("KPIs")
-kpiSums = kpiData.groupby(['userName'])['kpi'].sum()
-kpiBarChart = px.bar(kpiSums,
+kpiDataFiltered = filterDfByDate(kpiData, startDate, endDate, 'date')
+kpiDataFiltered = filterDfByName(kpiDataFiltered, selectedUser, 'userName')
+if not kpiDataFiltered.empty:
+    kpiSums = kpiDataFiltered.groupby(['userName'])['kpi'].sum()
+    kpiBarChart = px.bar(kpiSums,
                     x=kpiSums.index,
                     y='kpi',
                     color_discrete_sequence=['#F63366']*len(kpiSums),
                     template='plotly_white')
-st.plotly_chart(kpiBarChart)
-st.dataframe(kpiData)
+    st.plotly_chart(kpiBarChart)
+    st.dataframe(kpiDataFiltered)
+else:
+    st.write('No data available in this time range')
 
 #Visit Visualization
 st.subheader('Visit Visualization')
-visitData = fbChildToDf("Visits")
-visitCounts = visitData['userName'].value_counts()
-visitBarChart = px.bar(visitCounts,
+visitDataFiltered = filterDfByDate(visitData, startDate, endDate, 'date')
+visitDataFiltered = filterDfByName(visitDataFiltered, selectedUser, 'userName')
+if not visitDataFiltered.empty:
+    visitCounts = visitDataFiltered['userName'].value_counts()
+    visitBarChart = px.bar(visitCounts,
                     x=visitCounts.index,
                     y='userName',
-                    color_discrete_sequence=['#F63366']*len(kpiSums),
+                    color_discrete_sequence=['#F63366']*len(visitCounts),
                     template='plotly_white')
-st.plotly_chart(visitBarChart)
-st.dataframe(visitData)
+    st.plotly_chart(visitBarChart)
+    st.dataframe(visitDataFiltered)
+else:
+    st.write('No data available in this time range')
 
 #Activity Visualization
 st.subheader('Activity Visualization')
-activityData = fbChildToDf("Activities")
-activityCounts = activityData['userName'].value_counts()
-activityBarChart = px.bar(activityCounts,
+activityDataFiltered = filterDfByDate(activityData, startDate, endDate, 'date')
+activityDataFiltered = filterDfByName(activityDataFiltered, selectedUser, 'userName')
+if not activityDataFiltered.empty:
+    activityCounts = activityDataFiltered['userName'].value_counts()
+    activityBarChart = px.bar(activityCounts,
                     x=activityCounts.index,
                     y='userName',
-                    color_discrete_sequence=['#F63366']*len(kpiSums),
+                    color_discrete_sequence=['#F63366']*len(activityCounts),
                     template='plotly_white')
-st.plotly_chart(activityBarChart)
-st.dataframe(activityData)
+    st.plotly_chart(activityBarChart)
+    st.dataframe(activityDataFiltered)
+else:
+    st.write('No data available in this time range')
 
 #Offer Visualization
 st.subheader('Offer Visualization')
-offerData = fbChildToDf("Offers")
-offerCounts = offerData['offerUserName'].value_counts()
-offerBarChart = px.bar(offerCounts,
+offerData = offerData[offerData['offerNumber']!="0"]
+offerDataFiltered = filterDfByDate(offerData, startDate, endDate, 'offerDate')
+offerDataFiltered = filterDfByName(offerDataFiltered, selectedUser, 'offerUserName')
+if not offerDataFiltered.empty:
+    offerCounts = offerDataFiltered['offerUserName'].value_counts()
+    offerBarChart = px.bar(offerCounts,
                     x=offerCounts.index,
                     y='offerUserName',
-                    color_discrete_sequence=['#F63366']*len(kpiSums),
+                    color_discrete_sequence=['#F63366']*len(offerCounts),
                     template='plotly_white')
-st.plotly_chart(offerBarChart)
-st.dataframe(offerData)
-
+    st.plotly_chart(offerBarChart)
+    st.dataframe(offerDataFiltered)
+else:
+    st.write('No data available in this time range')
+    
 #Authentication
 #auth=firebase.auth()
 #login
